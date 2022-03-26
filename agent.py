@@ -1,5 +1,6 @@
 import ipaddress
-from flask import Flask, request, jsonify
+from urllib import response
+from flask import Flask, request, jsonify, make_response
 from getmac import get_mac_address
 import json
 import os
@@ -17,12 +18,14 @@ app = Flask(__name__)
 
 @app.route('/', methods=['GET'])
 def home():
-    response = jsonify({'some': 'data'})
+    response = jsonify({'data': 'Welcome to the agent'})
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
 
 @app.route('/ls', methods=['GET'])
 def ls():
+    response = jsonify({'data': 'ls'})
+    response.headers.add('Access-Control-Allow-Origin', '*')
     body = request.get_json()
     print(body)
     try:
@@ -30,56 +33,75 @@ def ls():
             lsOutput = os.listdir(body['path'])
         else:
             lsOutput = os.listdir()
-        print(lsOutput)
-        return json.dumps(lsOutput)
+        response = jsonify({'data': lsOutput})
+        return response
     except:
-        return json.dumps({"error": "Invalid path"})
+        response = make_response(jsonify({"error": "Invalid path"}), 400)
+        return response
 
 @app.route('/mkdir', methods=['POST'])
 def mkdir():
     body = request.get_json()
     print(body)
+    response = jsonify({'data': 'mkdir'})
+    response.headers.add('Access-Control-Allow-Origin', '*')
     try:
         os.mkdir(body['path'])
-        return json.dumps({"success": "Directory created"})
+        response = jsonify({'data': 'Directory created'})
     except:
-        return json.dumps({"error": "Invalid path"})
+        response = make_response(jsonify({"error": "Invalid path"}), 400)
+    return response
 
 @app.route('/pwd', methods=['GET'])
 def pwd():
-    return json.dumps({"path": os.getcwd()})
+    response = jsonify({'data': 'pwd'})
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    response = jsonify({'data': os.getcwd()})
+    return response
 
 @app.route('/cd', methods=['POST'])
 def cd():
     body = request.get_json()
     print(body)
+    response = jsonify({'data': 'cd'})
+    response.headers.add('Access-Control-Allow-Origin', '*')
     try:
         os.chdir(body['path'])
-        return json.dumps({"path": os.getcwd()})
+        response = jsonify({'path': os.getcwd()})
+        return response
     except:
-        return json.dumps({"error": "Invalid path"})
+        response = make_response(jsonify({"error": "Invalid path"}), 400)
+        return response
 
 @app.route('/cat', methods=['GET'])
 def cat():
     body = request.get_json()
     print(body)
+    response = jsonify({'data': 'cat'})
+    response.headers.add('Access-Control-Allow-Origin', '*')
     try:
         with open(body['path'], 'r') as f:
-            return json.dumps({"content": f.read()})
+            response = jsonify({'content': f.read()})
+            return response
     except:
-        return json.dumps({"error": "Invalid path"})
+        response = make_response(jsonify({"error": "Invalid path"}), 400)
+        return response
 
 @app.route('/touch', methods=['POST'])
 def touch():
     body = request.get_json()
     print(body)
+    response = jsonify({'data': 'touch'})
+    response.headers.add('Access-Control-Allow-Origin', '*')
     try:
         with open(body['path'], 'w') as f:
             if 'content' in body:
                 f.write(body['content'])
-        return json.dumps({"success": "File created"})
+        response = jsonify({"success": "File created"})
+        return response
     except:
-        return json.dumps({"error": "Invalid path"})
+        response = make_response(jsonify({"error": "Invalid path"}), 400)
+        return response
 
 @app.route('/find', methods=['GET'])
 def find():
@@ -88,6 +110,7 @@ def find():
     dirsFound = []
     print(body)
     path = os.getcwd()
+    response = jsonify({'data': 'find'})
     try:
         if body != None and 'path' in body:
             path = body['path']
@@ -96,12 +119,16 @@ def find():
                 filesFound.append(os.path.join(root, body['name']))
             if body['name'] in dirs:
                 dirsFound.append(os.path.join(root, body['name']))
-        return json.dumps({"files": filesFound, "dirs": dirsFound})
+        response = jsonify({'files': filesFound, 'dirs': dirsFound})
+        return response
     except:
-        return json.dumps({"error": "Invalid search path"})
+        response = make_response(jsonify({"error": "Invalid path"}), 400)
+        return response
     
 @app.route('/ps', methods=['GET'])
 def ps():
+    response = jsonify({'data': 'ps'})
+    response.headers.add('Access-Control-Allow-Origin', '*')
     processList = []
     body = request.get_json()
     if body != None and 'sortBy' in body:
@@ -132,14 +159,15 @@ def ps():
                     pass
             processList.sort(key=lambda proc: proc['cpu'], reverse=True)
         else:
-            return json.dumps({"error": "Invalid sort criteria"})
+            return make_response(jsonify({"error": "Invalid sort criteria"}), 400)
     else:
         for proc in psutil.process_iter():
             try:
                 processList.append(proc.as_dict(attrs=['pid', 'name']))
             except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                 pass
-    return json.dumps(processList)
+    response = jsonify({'data': processList})
+    return response
 
 
 if __name__ == '__main__':
@@ -148,7 +176,7 @@ if __name__ == '__main__':
     networkName = None
     firebaseLink = "https://webboilerplates-default-rtdb.europe-west1.firebasedatabase.app/"
     firebase = firebase.FirebaseApplication(firebaseLink, None)
-    portNo = 5001
+    portNo = 5000
     print(os.getenv('REACT_APP_FIREBASE_APP_ID'))
     if sys.platform == 'win32':
         print("Hello from WINDOWS")
