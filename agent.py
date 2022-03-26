@@ -12,8 +12,29 @@ import sys
 import re
 import sys
 from firebase import firebase
+import requests
+
+
+publicKey = None
+privateKey = None
 
 app = Flask(__name__)
+
+def generateBlockchain(passphrase="storageonablockchain"):
+    global publicKey, privateKey
+    body = {"DataToGenerateKey" : passphrase}
+    response = requests.post("http://localhost:8080/createWallet", json=body)
+    publicKey = response.json()["WalPubKey"]
+    privateKey = response.json()["WalPrivateKey"]
+
+def mine(publicKey, macAddr):
+    body = {"Wallet" : publicKey, "DeviceName" : macAddr}
+    response = requests.post("http://localhost:8080/mine", json=body)
+
+def saveDataPerDevice(privateKey, macAddr, path, content, fileName):
+    body = {"PrivateKey" : privateKey, "DeviceName" : macAddr, "FileData" : content, "Path" : path, "Filename" : fileName}
+    response = requests.post("http://localhost:8080/saveData", json=body)
+    print(response.json())
 
 @app.route('/', methods=['GET'])
 def home():
@@ -244,4 +265,8 @@ if __name__ == '__main__':
     if not networkExists:
         res = firebase.post('/networks', new_network)
         print(res)
+    generateBlockchain()
+    print(publicKey)
+    print(privateKey)
+    mine(publicKey, macAddress)
     app.run(host='0.0.0.0', port=portNo)
