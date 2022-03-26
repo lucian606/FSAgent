@@ -13,7 +13,6 @@ import re
 import sys
 from firebase import firebase
 
-
 app = Flask(__name__)
 
 @app.route('/', methods=['GET'])
@@ -169,6 +168,24 @@ def ps():
     response = jsonify({'data': processList})
     return response
 
+
+@app.route('/tail', methods=['GET'])
+def tail():
+    body = request.get_json()
+    print(body)
+    response = jsonify({'data': 'tail'})
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    try:
+        firstTail = body['firstTail']
+        with open(body['path'], 'r') as f:
+            if firstTail == True:
+                response = jsonify({'content': f.readlines()[-10:]})
+            else:
+                response = jsonify({'content': f.readlines()[-1]})
+            return response
+    except:
+        response = make_response(jsonify({"error": "Invalid path"}), 400)
+        return response
 
 if __name__ == '__main__':
     address = socket.gethostbyname(socket.gethostname())
