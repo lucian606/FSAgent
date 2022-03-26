@@ -7,6 +7,7 @@ import random
 import socket
 import subprocess
 import re
+import sys
 from firebase import firebase
 
 
@@ -145,10 +146,15 @@ if __name__ == '__main__':
     firebase = firebase.FirebaseApplication(firebaseLink, None)
     portNo = 5000
     print(os.getenv('REACT_APP_FIREBASE_APP_ID'))
-    if os.name == 'nt':
+    if sys.platform == 'win32':
         print("Hello from WINDOWS")
         wifi = subprocess.check_output("netsh wlan show interfaces")
         networkName = re.findall(r'SSID\s*:\s*(.*)', wifi.decode('utf-8'))[0][:-1]
+    elif sys.platform == 'darwin':
+        print("Hello from MAC")
+        wifi = subprocess.check_output(["/System/Library/PrivateFrameworks/Apple80211.framework/Resources/airport", "-I"])
+        print(wifi)
+        networkName = re.findall(r'SSID\s*:\s*(.*)', wifi.decode('utf-8'))[0].split(': ')[1]
     print(f"Ip Addr: {address}\nMac Addr: {macAddress}\nNetwork Name: {networkName}\nPort No: {portNo}")
     new_agent = {
         "ip": address,
