@@ -17,7 +17,9 @@ app = Flask(__name__)
 
 @app.route('/', methods=['GET'])
 def home():
-    return "Welcome to the AGENT API"
+    response = jsonify({'some': 'data'})
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
 
 @app.route('/ls', methods=['GET'])
 def ls():
