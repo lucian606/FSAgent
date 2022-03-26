@@ -1,3 +1,4 @@
+import ipaddress
 from flask import Flask, request, jsonify
 from getmac import get_mac_address
 import json
@@ -8,6 +9,7 @@ import socket
 import subprocess
 import sys
 import re
+import sys
 from firebase import firebase
 
 
@@ -146,15 +148,22 @@ if __name__ == '__main__':
     firebase = firebase.FirebaseApplication(firebaseLink, None)
     portNo = 5001
     print(os.getenv('REACT_APP_FIREBASE_APP_ID'))
-    if os.name == 'nt':
+    if sys.platform == 'win32':
         print("Hello from WINDOWS")
         wifi = subprocess.check_output("netsh wlan show interfaces")
         networkName = re.findall(r'SSID\s*:\s*(.*)', wifi.decode('utf-8'))[0][:-1]
     elif sys.platform == 'darwin':
         print("Hello from MAC")
+        address = socket.gethostbyname_ex(socket.gethostname())[-1][-1]
         wifi = subprocess.check_output(["/System/Library/PrivateFrameworks/Apple80211.framework/Resources/airport", "-I"])
         print(wifi)
         networkName = re.findall(r'SSID\s*:\s*(.*)', wifi.decode('utf-8'))[0].split(': ')[1]
+    else:
+        print("Hello from Linux")
+        address = subprocess.check_output(["hostname", "-I"]).decode('utf-8').split(' ')[0]
+        wifi = subprocess.check_output(["iwgetid", "-r"])
+        networkName = wifi.decode('utf-8')[:-1]
+        print(networkName)
     print(f"Ip Addr: {address}\nMac Addr: {macAddress}\nNetwork Name: {networkName}\nPort No: {portNo}")
     new_agent = {
         "ip": address,
