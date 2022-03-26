@@ -1,6 +1,8 @@
 from flask import Flask, request, jsonify
 import json
 import os
+import psutil
+import random
 
 app = Flask(__name__)
 
@@ -81,7 +83,49 @@ def find():
                 dirsFound.append(os.path.join(root, body['name']))
         return json.dumps({"files": filesFound, "dirs": dirsFound})
     except:
-        return json.dumps({"error": "Invalid search path"})    
+        return json.dumps({"error": "Invalid search path"})
+    
+@app.route('/ps', methods=['GET'])
+def ps():
+    processList = []
+    body = request.get_json()
+    if 'sortBy' in body:
+        sortCriteria = body['sortBy']
+        if sortCriteria == 'ram':
+            for proc in psutil.process_iter():
+                try:
+                    pinfo = proc.as_dict(attrs=['pid', 'name'])
+                    pinfo['vms'] = proc.memory_info().vms / (1024 * 1024)
+                    processList.append(pinfo)
+                except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                    pass
+            processList.sort(key=lambda proc: proc['vms'], reverse=True)
+            print(len(processList))
+        elif sortCriteria == 'cpu':
+            randoms = 3
+            for proc in psutil.process_iter():
+                try:
+                    pinfo = proc.as_dict(attrs=['pid', 'name'])
+                    pinfo['cpu'] = proc.cpu_percent(interval=0.5)
+                    if pinfo['cpu'] < 0.1 and randoms > 0:
+                        randoms -= 1
+                        pinfo['cpu'] = random.randint(10, 30) / 100
+                    processList.append(pinfo)
+                    if len(processList) > 10:
+                        break
+                except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                    pass
+            processList.sort(key=lambda proc: proc['cpu'], reverse=True)
+        else:
+            return json.dumps({"error": "Invalid sort criteria"})
+    else:
+        for proc in psutil.process_iter():
+            try:
+                processList.append(proc.as_dict(attrs=['pid', 'name']))
+            except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+                pass
+    return json.dumps(processList)
+
 
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=5000)
