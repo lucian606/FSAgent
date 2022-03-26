@@ -138,48 +138,5 @@ def ps():
 
 
 if __name__ == '__main__':
-    address = socket.gethostbyname(socket.gethostname())
-    macAddress = get_mac_address()
-    networkName = None
-    firebaseLink = "https://webboilerplates-default-rtdb.europe-west1.firebasedatabase.app/"
-    firebase = firebase.FirebaseApplication(firebaseLink, None)
-    portNo = 5000
-    print(os.getenv('REACT_APP_FIREBASE_APP_ID'))
-    if os.name == 'nt':
-        print("Hello from WINDOWS")
-        wifi = subprocess.check_output("netsh wlan show interfaces")
-        networkName = re.findall(r'SSID\s*:\s*(.*)', wifi.decode('utf-8'))[0][:-1]
-    print(f"Ip Addr: {address}\nMac Addr: {macAddress}\nNetwork Name: {networkName}\nPort No: {portNo}")
-    new_agent = {
-        "ip": address,
-        "mac": macAddress,
-        "network": networkName,
-        "port": portNo
-    }
-    new_network = {
-        "name": networkName
-    }
-    agentExists = False
-    agents = firebase.get('/agents', None)
-    if agents != None:
-        for agent in agents:
-            if agents[agent]['mac'] == macAddress:
-                print("Agent already registered, updating entry")
-                agentExists = True
-                firebase.patch(f"/agents/{agent}", new_agent)
-                break
-    if not agentExists:
-        res = firebase.post('/agents', new_agent)
-        print(res)
-    networks = firebase.get('/networks', None)
-    networkExists = False
-    if networks != None:
-        for network in networks:
-            if networks[network]['name'] == networkName:
-                print("Network already registered")
-                networkExists = True
-                break
-    if not networkExists:
-        res = firebase.post('/networks', new_network)
-        print(res)
-    app.run(host='0.0.0.0', port=portNo)
+    #print(socket.gethostbyname(socket.gethostname()))
+    app.run(host='0.0.0.0', port=5001)
