@@ -13,7 +13,7 @@ import re
 import sys
 from firebase import firebase
 import requests
-
+import datetime
 
 publicKey = None
 privateKey = None
@@ -242,10 +242,19 @@ if __name__ == '__main__':
         "ip": address,
         "mac": macAddress,
         "network": networkName,
-        "port": portNo
+        "port": portNo,
+        "name": socket.gethostname(),
+        "lastAccess": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     }
+    hashtags = ['home', 'work', 'personal', 'office', 'sensor', 'IoT', 'important', 'internal']
+    descriptions = ["This is my home network in Houston. Encompasses...", "This is my work network used for tasks", "This is an important network for critical purposes", "This is the network of my IoT sensors"]
+    chosen_hashtags = random.choices(hashtags, k = 3)
+    description = random.choice(descriptions)
+    hashtags_str = ",".join(chosen_hashtags)
     new_network = {
-        "name": networkName
+        "name": networkName,
+        "hashtags": hashtags_str,
+        "description": description
     }
     agentExists = False
     agents = firebase.get('/agents', None)
@@ -266,10 +275,12 @@ if __name__ == '__main__':
             if networks[network]['name'] == networkName:
                 print("Network already registered")
                 networkExists = True
+                firebase.patch(f"/networks/{network}", new_network)
                 break
     if not networkExists:
         res = firebase.post('/networks', new_network)
         print(res)
+    print(hashtags_str)
     #generateBlockchain()
     #print(publicKey)
     #print(privateKey)
