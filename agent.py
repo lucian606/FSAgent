@@ -12,13 +12,15 @@ import sys
 import re
 import sys
 from firebase import firebase
+from flask_cors import CORS
 
 
 app = Flask(__name__)
+CORS(app, resources={r"*": {"origins": "*"}})
 
 @app.route('/', methods=['GET'])
 def home():
-    response = jsonify({'data': 'Welcome to the agent'})
+    response = jsonify({'data': ['Welcome to the agent']})
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
 
@@ -47,7 +49,7 @@ def mkdir():
     response.headers.add('Access-Control-Allow-Origin', '*')
     try:
         os.mkdir(body['path'])
-        response = jsonify({'data': 'Directory created'})
+        response = jsonify({'data': ['Directory created']})
     except:
         response = make_response(jsonify({"error": "Invalid path"}), 400)
     return response
@@ -56,7 +58,7 @@ def mkdir():
 def pwd():
     response = jsonify({'data': 'pwd'})
     response.headers.add('Access-Control-Allow-Origin', '*')
-    response = jsonify({'data': os.getcwd()})
+    response = jsonify({'data': [os.getcwd()]})
     return response
 
 @app.route('/cd', methods=['POST'])
@@ -67,13 +69,13 @@ def cd():
     response.headers.add('Access-Control-Allow-Origin', '*')
     try:
         os.chdir(body['path'])
-        response = jsonify({'path': os.getcwd()})
+        response = jsonify({'data': [os.getcwd()]})
         return response
     except:
         response = make_response(jsonify({"error": "Invalid path"}), 400)
         return response
 
-@app.route('/cat', methods=['GET'])
+@app.route('/cat', methods=['POST'])
 def cat():
     body = request.get_json()
     print(body)
@@ -81,7 +83,7 @@ def cat():
     response.headers.add('Access-Control-Allow-Origin', '*')
     try:
         with open(body['path'], 'r') as f:
-            response = jsonify({'content': f.read()})
+            response = jsonify({'data': [f.read()]})
             return response
     except:
         response = make_response(jsonify({"error": "Invalid path"}), 400)
@@ -97,13 +99,13 @@ def touch():
         with open(body['path'], 'w') as f:
             if 'content' in body:
                 f.write(body['content'])
-        response = jsonify({"success": "File created"})
+        response = jsonify({"data": ["File created"]})
         return response
     except:
         response = make_response(jsonify({"error": "Invalid path"}), 400)
         return response
 
-@app.route('/find', methods=['GET'])
+@app.route('/find', methods=['POST'])
 def find():
     body = request.get_json()
     filesFound = []
@@ -176,7 +178,7 @@ if __name__ == '__main__':
     networkName = None
     firebaseLink = "https://webboilerplates-default-rtdb.europe-west1.firebasedatabase.app/"
     firebase = firebase.FirebaseApplication(firebaseLink, None)
-    portNo = 5000
+    portNo = 5001
     print(os.getenv('REACT_APP_FIREBASE_APP_ID'))
     if sys.platform == 'win32':
         print("Hello from WINDOWS")
