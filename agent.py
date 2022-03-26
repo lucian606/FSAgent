@@ -3,18 +3,23 @@ import json
 import os
 import psutil
 import random
+import socket
 
 app = Flask(__name__)
+
+@app.route('/', methods=['GET'])
+def home():
+    return "Welcome to the AGENT API"
 
 @app.route('/ls', methods=['GET'])
 def ls():
     body = request.get_json()
     print(body)
     try:
-        if 'path' in body:
+        if body != None and 'path' in body:
             lsOutput = os.listdir(body['path'])
         else:
-            lsOutput = os.listdir('.')
+            lsOutput = os.listdir()
         print(lsOutput)
         return json.dumps(lsOutput)
     except:
@@ -74,7 +79,7 @@ def find():
     print(body)
     path = os.getcwd()
     try:
-        if 'path' in body:
+        if body != None and 'path' in body:
             path = body['path']
         for root, dirs, files in os.walk(path):
             if body['name'] in files:
@@ -89,7 +94,7 @@ def find():
 def ps():
     processList = []
     body = request.get_json()
-    if 'sortBy' in body:
+    if body != None and 'sortBy' in body:
         sortCriteria = body['sortBy']
         if sortCriteria == 'ram':
             for proc in psutil.process_iter():
@@ -128,4 +133,5 @@ def ps():
 
 
 if __name__ == '__main__':
-    app.run(host='127.0.0.1', port=5000)
+    #print(socket.gethostbyname(socket.gethostname()))
+    app.run(host='0.0.0.0', port=5000)
