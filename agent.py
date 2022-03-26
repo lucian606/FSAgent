@@ -115,11 +115,12 @@ def touch():
     print(body)
     response = jsonify({'data': 'touch'})
     response.headers.add('Access-Control-Allow-Origin', '*')
-    try:
+    try:     
         with open(body['path'], 'w') as f:
-            if 'content' in body:
+            if 'content' in body:   
                 f.write(body['content'])
         response = jsonify({"data": ["File created"]})
+        print(response)
         return response
     except:
         response = make_response(jsonify({"error": "Invalid path"}), 400)
@@ -141,7 +142,9 @@ def find():
                 filesFound.append(os.path.join(root, body['name']))
             if body['name'] in dirs:
                 dirsFound.append(os.path.join(root, body['name']))
-        response = jsonify({'files': filesFound, 'dirs': dirsFound})
+        response = jsonify({'data': filesFound + dirsFound})
+        print(dirsFound)
+        print(filesFound)
         return response
     except:
         response = make_response(jsonify({"error": "Invalid path"}), 400)
@@ -267,8 +270,8 @@ if __name__ == '__main__':
     if not networkExists:
         res = firebase.post('/networks', new_network)
         print(res)
-    generateBlockchain()
-    print(publicKey)
-    print(privateKey)
-    mine(publicKey, macAddress)
+    #generateBlockchain()
+    #print(publicKey)
+    #print(privateKey)
+    #mine(publicKey, macAddress)
     app.run(host='0.0.0.0', port=portNo)
