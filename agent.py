@@ -259,6 +259,33 @@ def getBlockchain():
     response = requests.get("http://localhost:8080/get")
     return make_response(jsonify({"blockchain": response.json()}), 200)
 
+@app.route('/download', methods=['GET'])
+def download():
+    body = request.get_json()
+    response = jsonify({'data': 'download'})
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    try:
+        with open(body['path'], 'r') as f:
+            response = make_response(jsonify({'content': f.read(), 'path' : body['path']}), 200)
+            return response
+    except:
+        response = make_response(jsonify({"error": "Invalid path"}), 400)
+        return response
+
+
+@app.route('/upload', methods=['POST'])
+def upload():
+    body = request.get_json()
+    response = jsonify({'data': 'upload'})
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    try:
+        with open(body['path'], 'w') as f:
+            f.write(body['content'])
+            return make_response(jsonify({'data': 'File uploaded'}), 200)
+    except:
+        response = make_response(jsonify({"error": "Invalid path"}), 400)
+        return response
+
 
 if __name__ == '__main__':
     address = socket.gethostbyname(socket.gethostname())
