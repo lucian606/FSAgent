@@ -159,15 +159,17 @@ def ps():
     body = request.get_json()
     if body != None and 'sortBy' in body:
         sortCriteria = body['sortBy']
+        print(sortCriteria)
         if sortCriteria == 'ram':
             for proc in psutil.process_iter():
                 try:
                     pinfo = proc.as_dict(attrs=['pid', 'name'])
                     pinfo['vms'] = proc.memory_info().vms / (1024 * 1024)
-                    processList.append(json.dumps(pinfo))
+                    processList.append(pinfo)
                 except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                     pass
             processList.sort(key=lambda proc: proc['vms'], reverse=True)
+            processList = list(map(lambda proc: json.dumps(proc), processList))
             print(len(processList))
         elif sortCriteria == 'cpu':
             randoms = 3
@@ -178,12 +180,13 @@ def ps():
                     if pinfo['cpu'] < 0.1 and randoms > 0:
                         randoms -= 1
                         pinfo['cpu'] = random.randint(10, 30) / 100
-                    processList.append(json.dumps(pinfo))
+                    processList.append(pinfo)
                     if len(processList) > 10:
                         break
                 except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                     pass
             processList.sort(key=lambda proc: proc['cpu'], reverse=True)
+            processList = list(map(lambda proc: json.dumps(proc), processList))
         else:
             return make_response(jsonify({"error": "Invalid sort criteria"}), 400)
     else:
@@ -258,19 +261,19 @@ def monkey():
 @app.route('/blocks', methods=['GET'])
 def getBlockchain():
     response = requests.get("http://localhost:8080/get")
-    return make_response(jsonify({"blockchain": response.json()}), 200)
+    return make_response(jsonify({"data": response.json()}), 200)
 
-@app.route('/download', methods=['GET'])
+@app.route('/download', methods=['POST'])
 def download():
     body = request.get_json()
     response = jsonify({'data': 'download'})
     response.headers.add('Access-Control-Allow-Origin', '*')
     try:
         with open(body['path'], 'r') as f:
-            response = make_response(jsonify({'content': f.read(), 'path' : body['path']}), 200)
+            response = make_response(json.dumps({'data' :{'content': f.read(), 'path' : body['path']}}), 200)
             return response
     except:
-        response = make_response(jsonify({"error": "Invalid path"}), 400)
+        response = make_response(json.dumps({"error": "Invalid path"}), 400)
         return response
 
 
@@ -280,7 +283,7 @@ def upload():
     response = jsonify({'data': 'upload'})
     response.headers.add('Access-Control-Allow-Origin', '*')
     try:
-        with open(body['path'], 'w') as f:
+        with open(body['name'], 'w') as f:
             f.write(body['content'])
             return make_response(jsonify({'data': 'File uploaded'}), 200)
     except:
