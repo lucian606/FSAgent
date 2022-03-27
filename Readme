@@ -1,0 +1,65 @@
+Ruta: /ls
+Metoda: GET
+Body: {'path' : path_to_list}
+Return: {'data' : [list of files in path]}
+Obs: Se poate da body gol si face ls pe curr dir.
+
+Ruta: /mkdir
+Metoda: POST
+Body: {'path' : path_to_create_dir}
+Return: {'data' : 'Directory created'} in caz de succes altfel eroare
+Creaza directorul in pathul respectiv
+
+Ruta: /pwd
+Metoda: GET
+Return: {'data' : path_to_current_dir}
+Returneaza pathul curent
+
+Ruta: /cd
+Metoda: POST
+Body: {'path' : path_to_change_dir}
+Return: {'data' : new_path} in caz de succes altfel eroare
+Schimba directorul curent in pathul respectiv
+
+Ruta: /cat
+Metoda: POST
+Body: {'path' : path_to_cat}
+Return: {'data' : content_of_file} in caz de succes altfel eroare
+Returneaza continutul fisierului in pathul respectiv
+
+Ruta: /touch
+Metoda: POST
+Body: {'path' : path_to_touch, 'content' : content_to_write}
+Return: {'data' : 'File created'} in caz de succes altfel eroare
+Creaza fisierul in pathul respectiv cu continutul content_to_write
+Obs: Se poate da continut gol si face fisier gol
+
+Ruta: /find
+Metoda: POST
+Body: {'path' : path_to_search, 'name' : name_to_find}
+Return: {'data' : [list of files/dirs with name_to_find]}
+Returneaza lista de fisiere/directoare care se numesc name_to_find, cautand recursiv
+Obs: Se poate da path gol si cauta in dir curent
+
+Ruta: /ps
+Metoda: GET
+Body: {'sortBy' : cpu/ram}
+Return: {'data' : [list of procs]}
+Returneaza lista cu procesele curente, putand fi sortate dupa mem utilizata si cpu
+Obs: Se poate lasa sort by gol si intoarce toate procesele neordonata
+
+Ruta: /tail
+Metoda: GET
+Body: {'path' : path_to_file}
+Return: {'content' : [lista cu ultimele linii]}
+Daca se ruleaza de mai multe ori ar intoarce tot fisierul
+
+Ruta: /blockchain
+Metoda: POST
+Body: {'Path' : path_to_file, 'FileName': name_of_file}
+Pune fisierul cu numele name_of_file din path_to_file in blockchain
+
+Ruta: /monkey
+Metoda: POST
+Body: {'newPath' : new_path, 'fileName' : name_of_file}
+Ia fisierul din "blockchain" si il pune in noul path
