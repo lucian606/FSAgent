@@ -64,6 +64,10 @@ Metoda: POST
 Body: {'newPath' : new_path, 'fileName' : name_of_file}
 Ia fisierul din "blockchain" si il pune in noul path
 
+Ruta: /blocks
+Metoda: GET
+Returneaza un json {"blockchain" : block_chain_json}
+
 
 
 localhost:8080/createWallet

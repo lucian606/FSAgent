@@ -208,7 +208,7 @@ def tail():
             if firstTail == True:
                 response = jsonify({'content': f.readlines()[-10:]})
             else:
-                response = jsonify({'content': f.readlines()[-1]})
+                response = jsonify({'content': f.readlines()})
             return response
     except:
         response = make_response(jsonify({"error": "Invalid path"}), 400)
@@ -253,6 +253,12 @@ def monkey():
         return make_response(jsonify({"data": "File copied"}), 200)
     except:
         return make_response(jsonify({"error": "Invalid path"}), 400)
+
+@app.route('/blocks', methods=['GET'])
+def getBlockchain():
+    response = requests.get("http://localhost:8080/get")
+    return make_response(jsonify({"blockchain": response.json()}), 200)
+
 
 if __name__ == '__main__':
     address = socket.gethostbyname(socket.gethostname())
