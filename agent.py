@@ -45,7 +45,7 @@ def home():
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
 
-@app.route('/ls', methods=['GET'])
+@app.route('/ls', methods=['POST'])
 def ls():
     response = jsonify({'data': 'ls'})
     response.headers.add('Access-Control-Allow-Origin', '*')
@@ -151,7 +151,7 @@ def find():
         response = make_response(jsonify({"error": "Invalid path"}), 400)
         return response
     
-@app.route('/ps', methods=['GET'])
+@app.route('/ps', methods=['POST'])
 def ps():
     response = jsonify({'data': 'ps'})
     response.headers.add('Access-Control-Allow-Origin', '*')
@@ -164,7 +164,7 @@ def ps():
                 try:
                     pinfo = proc.as_dict(attrs=['pid', 'name'])
                     pinfo['vms'] = proc.memory_info().vms / (1024 * 1024)
-                    processList.append(pinfo)
+                    processList.append(json.dumps(pinfo))
                 except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                     pass
             processList.sort(key=lambda proc: proc['vms'], reverse=True)
@@ -178,7 +178,7 @@ def ps():
                     if pinfo['cpu'] < 0.1 and randoms > 0:
                         randoms -= 1
                         pinfo['cpu'] = random.randint(10, 30) / 100
-                    processList.append(pinfo)
+                    processList.append(json.dumps(pinfo))
                     if len(processList) > 10:
                         break
                 except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
@@ -189,7 +189,8 @@ def ps():
     else:
         for proc in psutil.process_iter():
             try:
-                processList.append(proc.as_dict(attrs=['pid', 'name']))
+                pinfo = proc.as_dict(attrs=['pid', 'name'])
+                processList.append(json.dumps(pinfo))
             except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
                 pass
     response = jsonify({'data': processList})
