@@ -63,3 +63,31 @@ Ruta: /monkey
 Metoda: POST
 Body: {'newPath' : new_path, 'fileName' : name_of_file}
 Ia fisierul din "blockchain" si il pune in noul path
+
+
+
+localhost:8080/createWallet
+{
+    "WalPubKey": "cf388a7897ec9513931bd0a0275d0efbebb03cd2262a39a4439888de6d8515ed3f679a7f93fb62dfd9f443d3052c346836edc11c864693efa9821473113821e7",
+    "WalPrivateKey": "a517b5d93653d14e6e3aeee7e25872e291b93c18dec6fbfc175733e91fc72d5989503e63ed2f1c923a4e3f2da80e88c7b9b6554ca77be3f96ae235bc4b65114d",
+    "Money": 0
+}
+
+localhost:8080/mine
+
+localhost:8080/get
+
+localhost:8080/get/device/name
+{
+    "PrivateKey" :"a517b5d93653d14e6e3aeee7e25872e291b93c18dec6fbfc175733e91fc72d5989503e63ed2f1c923a4e3f2da80e88c7b9b6554ca77be3f96ae235bc4b65114d",
+	"DeviceToAccess" :"linux-123"
+}
+
+localhost:8080/put/device/data
+{
+    "PrivateKey":"a517b5d93653d14e6e3aeee7e25872e291b93c18dec6fbfc175733e91fc72d5989503e63ed2f1c923a4e3f2da80e88c7b9b6554ca77be3f96ae235bc4b65114d",
+    "DeviceName":"linux-123",
+	"Path" :      "/data/",
+	"FileData" :  "aogrwpoefjkngtohwe[p",
+    "Filename":"file.txt"
+}
