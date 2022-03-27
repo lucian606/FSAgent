@@ -14,6 +14,7 @@ import sys
 from firebase import firebase
 import requests
 import datetime
+import shutil
 
 publicKey = None
 privateKey = None
@@ -213,6 +214,46 @@ def tail():
         response = make_response(jsonify({"error": "Invalid path"}), 400)
         return response
 
+@app.route('/blockchain', methods=['POST'])
+def blockchain():
+    global privateKey
+    print(privateKey)
+    body = request.get_json()
+    response = jsonify({'data': 'blockchain'})
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    path = body['Path']
+    name = body['FileName']
+    deviceName = get_mac_address()
+    fileData = None
+    try:
+        print(path + "\\" + name)
+        with open(path + "\\" + name, 'r') as f:
+            fileData = f.read()
+            reqBody = {
+                "PrivateKey" : privateKey,
+                "Filename" : name,
+                "FileData" : fileData,
+                "Path" : path,
+                "DeviceName" : deviceName
+            }
+            print(reqBody)
+            response = requests.post("http://localhost:8080/put/device/data", json=reqBody)
+            return make_response(jsonify({"data": "Data uploaded to Blockchain"}), 200)
+    except:
+        response = make_response(jsonify({"error": "Invalid path"}), 400)
+        return response
+
+@app.route('/monkey', methods=['POST'])
+def monkey():
+    body = request.get_json()
+    newPath = body['newPath']
+    fileName = body['fileName']
+    try: 
+        shutil.copy("../hackitallBlockchain/blockhack/files/" + fileName, newPath)
+        return make_response(jsonify({"data": "File copied"}), 200)
+    except:
+        return make_response(jsonify({"error": "Invalid path"}), 400)
+
 if __name__ == '__main__':
     address = socket.gethostbyname(socket.gethostname())
     macAddress = get_mac_address()
@@ -254,7 +295,8 @@ if __name__ == '__main__':
     new_network = {
         "name": networkName,
         "hashtags": hashtags_str,
-        "description": description
+        "description": description,
+        "ip": "192.168.0.1"
     }
     agentExists = False
     agents = firebase.get('/agents', None)
@@ -281,8 +323,8 @@ if __name__ == '__main__':
         res = firebase.post('/networks', new_network)
         print(res)
     print(hashtags_str)
-    #generateBlockchain()
-    #print(publicKey)
-    #print(privateKey)
-    #mine(publicKey, macAddress)
+    generateBlockchain()
+    print(publicKey)
+    print(privateKey)
+    mine(publicKey, macAddress)
     app.run(host='0.0.0.0', port=portNo)
